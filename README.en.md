@@ -8,8 +8,7 @@
 ![Engine](https://img.shields.io/badge/Cocos%20Creator-3.8.8-blue)
 ![Language](https://img.shields.io/badge/TypeScript-strict%20core-3178c6)
 
-<!-- TODO(hero-gif): Record a 5-8 second gameplay demo GIF: deal cards -> pick cards -> pick operators -> win animation -> next round. Drop it at docs/hero.gif and uncomment the line below. -->
-<!-- ![Gameplay demo](docs/hero.gif) -->
+![GameStage_24 — Classic mode main screen](docs/hero.png)
 
 ---
 
@@ -24,9 +23,13 @@ GameStage_24 is built to prove that both problems can be solved cleanly on the c
 
 ---
 
-## Gameplay (one-paragraph version)
+## Gameplay + three modes
 
 Draw 4 playing cards (A=1, J/Q/K=11/12/13) and use `+`, `-`, `x`, `/` plus parentheses to make exactly 24. Every card must be used exactly once. Three modes are available: Classic (endless puzzles), Time Attack (90-second sprint), and Daily Challenge.
+
+| Classic | Time Attack | Daily Challenge |
+|:---:|:---:|:---:|
+| ![Classic mode](docs/hero.png) | ![90-second sprint](docs/sprint.png) | ![Daily challenge — same puzzle for everyone](docs/daily.png) |
 
 ---
 
@@ -49,6 +52,10 @@ Direct benefits of this constraint:
 - **The solver runs as a Node unit test** without booting the editor.
 - **The same logic runs identically inside the Douyin runtime, the Cocos editor preview, and a plain browser debug page.** `tt-env.ts:1` probes the runtime via the presence of `globalThis.tt`, and downstream modules branch accordingly.
 - **Low cost to port to other platforms.** To target WeChat / Kuaishou mini games, in theory only `platform/` needs to be swapped out.
+
+Below is the scene structure inside the Cocos Creator editor: the `GameStage` node holds references to every UI node (`Card1-4` / `OperatorPad` / `ModePad` / status labels…) via the Inspector on the right, and the state-machine layer writes reducer output onto those nodes — the UI is a pure function of state, components themselves hold no domain state.
+
+![Cocos Creator scene tree + GameStage component bindings](docs/editor.png)
 
 ---
 
@@ -242,5 +249,3 @@ assets/scripts/
 └── audio/        SoundManager
 ```
 
-<!-- TODO(screenshot): Screenshot of the Daily Challenge entry, drop it at docs/daily.png -->
-<!-- TODO(diagram): Solver diagram. Either a mermaid DFS parse tree for [3,3,7,7], or an ASCII-art equivalent. -->
