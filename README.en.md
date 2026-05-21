@@ -8,7 +8,26 @@
 ![Engine](https://img.shields.io/badge/Cocos%20Creator-3.8.8-blue)
 ![Language](https://img.shields.io/badge/TypeScript-strict%20core-3178c6)
 
-![GameStage_24 — Classic mode main screen](docs/hero.png)
+<p align="center">
+  <img src="docs/hero.png" width="260" alt="GameStage_24 — Classic mode main screen" />
+</p>
+
+---
+
+## Table of contents
+
+- [Why I built this](#why-i-built-this)
+- [Gameplay + three modes](#gameplay--three-modes)
+- [Try it now](#try-it-now)
+- [Architecture](#architecture-core-logic-with-zero-platform-dependencies)
+- [Technical highlights](#technical-highlights)
+  - [1. DFS backtracking solver + a custom Fraction class (the core)](#1-dfs-backtracking-solver--a-custom-fraction-class-the-core)
+  - [2. Hash-seeded "Daily Challenge" — zero server involvement](#2-hash-seeded-daily-challenge--zero-server-involvement)
+  - [3. Douyin platform adapter + rewarded video ad fallback](#3-douyin-platform-adapter--rewarded-video-ad-fallback)
+- [Project structure](#project-structure)
+- [Local development](#local-development)
+- [Contributing](#contributing)
+- [Known issues](#known-issues)
 
 ---
 
@@ -29,7 +48,20 @@ Draw 4 playing cards (A=1, J/Q/K=11/12/13) and use `+`, `-`, `x`, `/` plus paren
 
 | Classic | Time Attack | Daily Challenge |
 |:---:|:---:|:---:|
-| ![Classic mode](docs/hero.png) | ![90-second sprint](docs/sprint.png) | ![Daily challenge — same puzzle for everyone](docs/daily.png) |
+| <img src="docs/hero.png" width="220" alt="Classic mode" /> | <img src="docs/sprint.png" width="220" alt="90-second sprint" /> | <img src="docs/daily.png" width="220" alt="Daily challenge — same puzzle for everyone" /> |
+
+---
+
+## Try it now
+
+> Current status: **single scene built, not yet launched**. See [Known issues](#known-issues).
+
+| Platform | How to try it today | Notes |
+|---|---|---|
+| **Douyin Mini Game** | Not yet available in Douyin search | No submission to ByteDance Developer Console yet; once listed, search keywords will be 「算24点」/「数24点」 |
+| **Browser preview** | Cocos Creator 3.8.8 → open this directory → Preview in browser | The `isWeb()` branch activates, storage uses `localStorage`, and rewarded video auto-degrades to the `'no-sdk'` branch (see [Highlight 3](#3-douyin-platform-adapter--rewarded-video-ad-fallback)) |
+
+> No server dependency — the Daily Challenge hand is generated locally from a date seed via a PRNG ([Highlight 2](#2-hash-seeded-daily-challenge--zero-server-involvement)), so the game runs fully offline.
 
 ---
 
@@ -55,7 +87,9 @@ Direct benefits of this constraint:
 
 Below is the scene structure inside the Cocos Creator editor: the `GameStage` node holds references to every UI node (`Card1-4` / `OperatorPad` / `ModePad` / status labels…) via the Inspector on the right, and the state-machine layer writes reducer output onto those nodes — the UI is a pure function of state, components themselves hold no domain state.
 
-![Cocos Creator scene tree + GameStage component bindings](docs/editor.png)
+<p align="center">
+  <img src="docs/editor.png" width="520" alt="Cocos Creator scene tree + GameStage component bindings" />
+</p>
 
 ---
 
@@ -226,26 +260,63 @@ Two details worth calling out:
 
 ---
 
-## Development guide
+## Project structure
+
+```
+Point24/
+├── assets/
+│   ├── scripts/
+│   │   ├── core/                   # Pure TS algorithm layer (fraction / solver / seed / deck / deal / scoring)
+│   │   │                           # Zero platform dependencies — runs as Node unit tests
+│   │   ├── state/                  # reducer + Store (roundReducer / GameStore / hintGenerator / timer)
+│   │   │                           # Action in, state + effects out. Engine-agnostic.
+│   │   ├── platform/               # Douyin tt.* adapter + browser / in-memory fallbacks
+│   │   │                           # tt-env / tt-storage / tt-rewarded-ad / tt-share / tt-audio / tt-banner
+│   │   ├── ui/                     # Cocos components (GameStage / CardView / OperatorPad / ModePad / theme)
+│   │   └── audio/                  # SoundManager
+│   └── scenes/                     # Cocos scenes (GameStage main scene)
+└── package.json                    # Cocos Creator 3.8.8 project descriptor
+```
+
+Hard dependency constraint: `ui → state → core`; `platform` is its own layer; `core` must never import `cc.*` or `tt.*` (see `assets/scripts/README.md:11`).
+
+---
+
+## Local development
 
 Environment:
+
 - Node 16+
 - Cocos Creator 3.8.8 (`package.json:5`)
 - TypeScript (`tsconfig.json` extends the Cocos-generated `temp/tsconfig.cocos.json`)
 
-Running locally:
+Run it:
+
 1. Open this directory with Cocos Creator 3.8.8.
-2. Preview directly in browser (the `isWeb()` branch activates, storage uses `localStorage`, ads are disabled).
-3. To build for Douyin Mini Game: menu -> Project -> Build, then pick platform `bytedance-mini-game`.
+2. Preview directly in browser — the `isWeb()` branch activates, storage uses `localStorage`, rewarded video auto-degrades to the `'no-sdk'` branch.
+3. Build for Douyin Mini Game: menu → Project → Build, then pick platform `bytedance-mini-game`.
+4. Optional core-algorithm unit tests: because `core/` has no Cocos dependency, you can run `npm test` or `vitest` directly on `core/*.ts` in Node.
 
-Directory tour:
+---
 
-```
-assets/scripts/
-├── core/         Pure TS algorithm layer (fraction / solver / seed / deck / deal / scoring)
-├── state/        reducer + Store (roundReducer / GameStore / hintGenerator / timer)
-├── platform/     Douyin tt.* adapter (tt-env / tt-storage / tt-rewarded-ad / tt-share / tt-audio / tt-banner)
-├── ui/           Cocos components (GameStage / CardView / OperatorPad / ModePad / theme)
-└── audio/        SoundManager
-```
+## Contributing
 
+Issues and PRs welcome. Before you start:
+
+- **Open an issue first for large changes**: PRs that touch the core algorithm (solver / Fraction / daily seed), the platform adapter contract (`platform/` interface shapes), or the state-machine contract (`GameStore` action / state shape) should be discussed in an issue first.
+- **Branch naming**: `feat-<scope>` / `fix-<scope>` / `docs-<scope>` / `refactor-<scope>`, e.g. `feat-tournament-mode`, `fix-rewarded-ad-cancel`.
+- **Commits**: follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) (`feat:` / `fix:` / `docs:` / `chore:` / `refactor:` prefixes).
+- **Merge style**: all PRs use **Squash merge** to keep `main` linear.
+- **Layering taboo**: `core/` and `state/` **must never import `cc.*` or `tt.*`** — this is a hard project constraint (see [Architecture](#architecture-core-logic-with-zero-platform-dependencies)). Violating it breaks the "core logic runs everywhere" guarantee. Reviewers will check `import` lists.
+- **Test requirements**: any change to pure functions in `core/solver.ts` / `core/fraction.ts` / `core/seed.ts` must come with new unit-test cases (Node-only, no editor dependency).
+
+---
+
+## Known issues
+
+- [ ] **Douyin Mini Game not launched**: not yet submitted to the ByteDance Developer Console; currently only the Cocos Creator browser preview or a self-built bundle in the Douyin developer tool can run it.
+- [ ] **Only a single main scene right now**: `GameStage` carries Classic / Time Attack / Daily Challenge in one scene; no scene split, no multiplayer / room-based scenes yet.
+- [ ] **Daily Challenge is vulnerable to local clock changes**: the seed algorithm is purely client-side ([Highlight 2](#2-hash-seeded-daily-challenge--zero-server-involvement)) — accepting that cost is the explicit trade-off. If the product pivots toward competitive play, swap to server-pushed puzzles at the single call site in `deal.ts:103`.
+- [ ] **Core unit tests not yet wired up**: `core/solver.ts` / `core/fraction.ts` / `core/seed.ts` are testable in Node, but no `vitest` / `jest` entry point is configured in the repo yet. This needs to land before shipping.
+- [ ] **Puzzle bank is not exhaustively enumerated**: the advanced pool (`constants.ts:20`) is hand-picked. In principle all 1,820 combinations of 4 ranks could be enumerated and bucketed by solution count — not done yet.
+- [ ] **Rewarded video copy / throttle is hard-coded**: the "first hint free, second hint requires an ad" policy lives directly in `GameStore.useHint()` (`GameStore.ts:201`) and is not extracted into config.
