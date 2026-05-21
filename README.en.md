@@ -1,4 +1,4 @@
-# GameStage_24
+# Point24
 
 > English | [简体中文](./README.md)
 
@@ -9,7 +9,7 @@
 ![Language](https://img.shields.io/badge/TypeScript-strict%20core-3178c6)
 
 <p align="center">
-  <img src="docs/hero.png" width="260" alt="GameStage_24 — Classic mode main screen" />
+  <img src="docs/hero.png" width="640" alt="Point24 — Classic mode main screen" />
 </p>
 
 ---
@@ -38,7 +38,7 @@
 1. **The solver uses floating-point numbers**, so a puzzle like `(3 / 7) x 7 x 4 = 24` gets misclassified as "no solution". As a workaround, level generation falls back to a small hand-written deck pool, and long-term players keep seeing the same hands over and over.
 2. **Daily Challenge is either missing or requires a backend.** For a solo developer shipping a backendless mini game, the "everyone gets the same puzzle today" feature is usually the first thing cut.
 
-GameStage_24 is built to prove that both problems can be solved cleanly on the client with a modest codebase. The whole project — core algorithm, state machine, and Douyin integration — fits in fewer than 30 TypeScript files.
+Point24 is built to prove that both problems can be solved cleanly on the client with a modest codebase. The whole project — core algorithm, state machine, and Douyin integration — fits in fewer than 30 TypeScript files.
 
 ---
 
@@ -48,7 +48,7 @@ Draw 4 playing cards (A=1, J/Q/K=11/12/13) and use `+`, `-`, `x`, `/` plus paren
 
 | Classic | Time Attack | Daily Challenge |
 |:---:|:---:|:---:|
-| <img src="docs/hero.png" width="220" alt="Classic mode" /> | <img src="docs/sprint.png" width="220" alt="90-second sprint" /> | <img src="docs/daily.png" width="220" alt="Daily challenge — same puzzle for everyone" /> |
+| <img src="docs/hero.png" width="300" alt="Classic mode" /> | <img src="docs/sprint.png" width="300" alt="90-second sprint" /> | <img src="docs/daily.png" width="300" alt="Daily challenge — same puzzle for everyone" /> |
 
 ---
 
@@ -88,7 +88,7 @@ Direct benefits of this constraint:
 Below is the scene structure inside the Cocos Creator editor: the `GameStage` node holds references to every UI node (`Card1-4` / `OperatorPad` / `ModePad` / status labels…) via the Inspector on the right, and the state-machine layer writes reducer output onto those nodes — the UI is a pure function of state, components themselves hold no domain state.
 
 <p align="center">
-  <img src="docs/editor.png" width="520" alt="Cocos Creator scene tree + GameStage component bindings" />
+  <img src="docs/editor.png" width="720" alt="Cocos Creator scene tree + GameStage component bindings" />
 </p>
 
 ---
